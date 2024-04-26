@@ -60,3 +60,35 @@ def test_regrade_assignment(client, h_principal):
 
     assert response.json['data']['state'] == AssignmentStateEnum.GRADED.value
     assert response.json['data']['grade'] == GradeEnum.B
+
+
+def test_get_teachers(client, h_principal):
+    response = client.get(
+        '/principal/teachers',
+        headers=h_principal
+    )
+
+    assert response.status_code == 200
+
+def requester_type(client,h_student_1):
+    response = client.get(
+        "/principal/teachers",
+        headers = h_student_1
+        )
+    assert response.statuscode == 403
+    assert response.json['error'] == "FyleError"
+    assert response.json['message'] == 'requester should be a principal'
+
+def test_grade_assignment_invalid_grade(client, h_principal):
+    """Only valid grades are A,B,C,D"""
+    response = client.post(
+        '/principal/assignments/grade',
+        json={
+            'id': 4,
+            'grade': 'CF'
+        },
+        headers=h_principal
+    )
+
+    assert response.status_code == 400
+
